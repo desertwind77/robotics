@@ -39,14 +39,14 @@ class GoPiGoRobot:
    DEFAULT_PAN_POS = 95
    DEFAULT_TILT_POS = 90
 
-   def __init__( self ):
+   def __init__(self):
       # Create the hardware access objects
-      self._gopigo = EasyGoPiGo3( use_mutex=True )
-      self._distanceSensor = self._gopigo.init_distance_sensor()
-      self._lineSensor = \
-         EasyLineFollower( port=self.LINE_FOLLOWING_SENSOR_PORT )
-      self._tilt = self._gopigo.init_servo( self.TILT_SERVO_PORT )
-      self._pan = self._gopigo.init_servo( self.PAN_SERVO_PORT )
+      self.gopigo = EasyGoPiGo3(use_mutex=True)
+      self.distance_sensor = self.gopigo.init_distance_sensor()
+      self.sensor_line = \
+         EasyLineFollower(port=self.LINE_FOLLOWING_SENSOR_PORT)
+      self.servo_tilt = self.gopigo.init_servo(self.TILT_SERVO_PORT)
+      self.servo_pan = self.gopigo.init_servo(self.PAN_SERVO_PORT)
 
       # Because the robot has a distance sensor, we expect it to support
       # multi-threads where one thread controls the movement of the robot
@@ -57,10 +57,10 @@ class GoPiGoRobot:
       self._robotControlLock = threading.Lock()
 
       # Cached current statuses of the robot
-      self._currentMotion = Direction.STOP
-      self._currentSpeed = None
-      self._currentPanPos = self.DEFAULT_PAN_POS
-      self._currentTiltPos = self.DEFAULT_TILT_POS
+      self.current_motion = Direction.STOP
+      self.current_speed = None
+      self.current_pan_pos = self.DEFAULT_PAN_POS
+      self.current_tilt_pos = self.DEFAULT_TILT_POS
 
       # Stop all the motors and reset the servo motor position. This is
       # neccessary because the previous run of this program might crash
@@ -69,206 +69,220 @@ class GoPiGoRobot:
       # after the program start.
       self.reset()
 
-   def reset( self ):
+   def reset(self):
       '''Stop the robot, reset the speed, and re-poisition the camera'''
       self.stop()
-      self.setSpeed( GoPiGoRobot.SPEED_DEFAULT_DPS )
-      self.pan( self.DEFAULT_PAN_POS )
-      self.tilt( self.DEFAULT_TILT_POS )
+      self.set_speed(GoPiGoRobot.SPEED_DEFAULT_DPS)
+      self.pan(self.DEFAULT_PAN_POS)
+      self.tilt(self.DEFAULT_TILT_POS)
 
-   def acquireLock( self ):
+   def acquire_lock(self):
       '''Acquire the hardware lock'''
       self._robotControlLock.acquire()
 
-   def releaseLock( self ):
+   def release_lock(self):
       '''Release the hardware lock'''
       self._robotControlLock.release()
 
-   def _lockAndExceptionHandler( origFunc ):
-      '''A decorator to handle exception'''
+   def threadlock(origFunc):
+      '''A decorator to handle thread lock and exception'''
 
-      def wrapper( self, *args, **kwargs ):
+      def wrapper(self, *args, **kwargs):
          result = None
          try:
-            self.acquireLock()
-            result = origFunc( self, *args, **kwargs )
+            self.acquire_lock()
+            result = origFunc(self, *args, **kwargs)
          except OSError as e:
             raise e
          finally:
-            self.releaseLock()
+            self.release_lock()
          return result
 
       return wrapper
 
-   @_lockAndExceptionHandler
-   def getBoard( self ):
+   @threadlock
+   def get_board(self):
       '''Get the board name'''
-      return self._gopigo.get_board()
+      return self.gopigo.get_board()
 
-   @_lockAndExceptionHandler
-   def getSerialNo( self ):
+   @threadlock
+   def get_serial_number(self):
       '''Get the serial number'''
-      return self._gopigo.get_id()
+      return self.gopigo.get_id()
 
-   @_lockAndExceptionHandler
-   def getManufacturer( self ):
+   @threadlock
+   def get_manufacturer(self):
       '''Get the manufacturere name'''
-      return self._gopigo.get_manufacturer()
+      return self.gopigo.get_manufacturer()
 
-   @_lockAndExceptionHandler
-   def getHardware( self ):
+   @threadlock
+   def get_hardware(self):
       '''Get the hardware version'''
-      return self._gopigo.get_version_hardware()
+      return self.gopigo.get_version_hardware()
 
-   @_lockAndExceptionHandler
-   def getFirmware( self ):
+   @threadlock
+   def get_firmware(self):
       '''Get the firmware version'''
-      return self._gopigo.get_version_firmware()
+      return self.gopigo.get_version_firmware()
 
-   @_lockAndExceptionHandler
-   def getVoltage( self ):
+   @threadlock
+   def get_voltage(self):
       '''Get the battery voltage'''
-      return self._gopigo.get_voltage_battery()
+      return self.gopigo.get_voltage_battery()
 
-   @_lockAndExceptionHandler
-   def getVoltage5V( self ):
+   @threadlock
+   def get_voltage5V(self):
       '''Get the 5V circuit voltage'''
-      return self._gopigo.get_voltage_5v()
+      return self.gopigo.get_voltage_5v()
 
-   @_lockAndExceptionHandler
-   def setLineType( self, lineType ):
+   @threadlock
+   def set_line_type(self, lineType):
       '''Select the line color for the line following sensor'''
       assert lineType in [ 'black', 'white' ]
-      self._lineSensor.set_calibration( lineType )
+      self.sensor_line.set_calibration(lineType)
 
-   @_lockAndExceptionHandler
-   def getLinePosition( self, weightedAvg=False ):
+   @threadlock
+   def get_line_position(self, weightedAvg=False):
       '''Read the value from the line following sensor'''
       if weightedAvg:
-         return self._lineSensor.read( 'weighted-avg' )
-      return self._lineSensor.position()
+         return self.sensor_line.read('weighted-avg')
+      return self.sensor_line.position()
 
-   @_lockAndExceptionHandler
-   def getDistance( self ):
+   @threadlock
+   def get_distance(self):
       '''Get the frontal distance from the distance sensor'''
-      if self._distanceSensor:
+      if self.distance_sensor:
          # We need to check if the distance sensor is available because
          # init_distance_sensor() may fail.
-         return self._distanceSensor.read_mm()
+         return self.distance_sensor.read_mm()
       return None
 
-   @_lockAndExceptionHandler
-   def getSpeed( self, isKmPerHr=True ):
+   @threadlock
+   def get_speed(self, isKmPerHr=True):
       '''Get the current speed in degree per second or Km/h'''
-      speedInDps = self._gopigo.get_speed()
+      speedInDps = self.gopigo.get_speed()
       result = speedInDps
       if isKmPerHr:
          wheelPerimeter = self.getWheelPerimeterInCm()
          speedInCmPerSec = speedInDps * wheelPerimeter / 360
          speedInKmPerHr = \
-            round( speedInCmPerSec * 60 * 60 / ( 100 * 1000 ), 2 )
+            round(speedInCmPerSec * 60 * 60 / (100 * 1000), 2)
          result = speedInKmPerHr
       return  result
 
-   @_lockAndExceptionHandler
-   def setSpeed( self, newSpeed ):
+   @threadlock
+   def set_speed(self, newSpeed):
       '''Set the current speed'''
       if newSpeed < self.SPEED_MIN_DPS:
          newSpeed = self.SPEED_MIN_DPS
       if newSpeed > self.SPEED_MAX_DPS:
          newSpeed = self.SPEED_MAX_DPS
-      self._gopigo.set_speed( in_speed=newSpeed )
-      self._currentSpeed = newSpeed
+      self.gopigo.set_speed(in_speed=newSpeed)
+      self.current_speed = newSpeed
 
-   @_lockAndExceptionHandler
-   def setLeftMotorSpeed( self, newSpeed ):
+   @threadlock
+   def set_left_motor_speed(self, newSpeed):
       '''Set the speed of the left motor'''
-      self._gopigo.set_motor_dps( self._gopigo.MOTOR_LEFT, dps=newSpeed )
+      self.gopigo.set_motor_dps(self.gopigo.MOTOR_LEFT, dps=newSpeed)
 
-   @_lockAndExceptionHandler
-   def setRightMotorSpeed( self, newSpeed ):
+   @threadlock
+   def set_right_motor_speed(self, newSpeed):
       '''Set the speed of the right motor'''
-      self._gopigo.set_motor_dps( self._gopigo.MOTOR_RIGHT, dps=newSpeed )
+      self.gopigo.set_motor_dps(self.gopigo.MOTOR_RIGHT, dps=newSpeed)
 
-   def accelerate( self ):
+   def accelerate(self):
       '''Accelerate for 100 degree per second'''
-      newSpeed = min( self._currentSpeed + 100, GoPiGoRobot.SPEED_MAX_DPS )
-      if newSpeed != self._currentSpeed:
-         self.setSpeed( newSpeed )
-         self._currentSpeed = newSpeed
+      newSpeed = min(self.current_speed + 100, GoPiGoRobot.SPEED_MAX_DPS)
+      if newSpeed != self.current_speed:
+         self.set_speed(newSpeed)
+         self.current_speed = newSpeed
 
-   def decelerate( self ):
+   def decelerate(self):
       '''Delerate for 100 degree per second'''
-      newSpeed = max( self._currentSpeed - 100, GoPiGoRobot.SPEED_MIN_DPS )
-      if newSpeed != self._currentSpeed:
-         self.setSpeed( newSpeed )
-         self._currentSpeed = newSpeed
+      newSpeed = max(self.current_speed - 100, GoPiGoRobot.SPEED_MIN_DPS)
+      if newSpeed != self.current_speed:
+         self.set_speed(newSpeed)
+         self.current_speed = newSpeed
 
-   @_lockAndExceptionHandler
-   def getCurrentMotion( self ):
+   @threadlock
+   def get_current_motion(self):
       '''Get the direction in which the robot is moving'''
-      return self._currentMotion
+      return self.current_motion
 
-   @_lockAndExceptionHandler
-   def forward( self ):
+   @threadlock
+   def forward(self):
       '''Move forward'''
-      if self._currentMotion != Direction.FORWARD:
-         self._gopigo.forward()
-         self._currentMotion = Direction.FORWARD
+      if self.current_motion != Direction.FORWARD:
+         self.gopigo.forward()
+         self.current_motion = Direction.FORWARD
 
-   @_lockAndExceptionHandler
-   def backward( self ):
+   @threadlock
+   def backward(self):
       '''Move backward'''
-      if self._currentMotion != Direction.BACKWARD:
-         self._gopigo.backward()
-         self._currentMotion = Direction.BACKWARD
+      if self.current_motion != Direction.BACKWARD:
+         self.gopigo.backward()
+         self.current_motion = Direction.BACKWARD
 
-   @_lockAndExceptionHandler
-   def left( self ):
+   @threadlock
+   def left(self):
       '''Move left'''
-      if self._currentMotion != Direction.LEFT:
-         self._gopigo.left()
-         self._currentMotion = Direction.LEFT
+      if self.current_motion != Direction.LEFT:
+         self.gopigo.left()
+         self.current_motion = Direction.LEFT
 
-   @_lockAndExceptionHandler
-   def right( self ):
+   @threadlock
+   def right(self):
       '''Move right'''
-      if self._currentMotion != Direction.RIGHT:
-         self._gopigo.right()
-         self._currentMotion = Direction.RIGHT
+      if self.current_motion != Direction.RIGHT:
+         self.gopigo.right()
+         self.current_motion = Direction.RIGHT
 
-   @_lockAndExceptionHandler
-   def stop( self ):
+   @threadlock
+   def stop(self):
       '''Stop the robot from moving'''
-      if self._currentMotion != Direction.STOP:
-         self._gopigo.stop()
-         self._currentMotion = Direction.STOP
+      if self.current_motion != Direction.STOP:
+         self.gopigo.stop()
+         self.current_motion = Direction.STOP
 
-   @_lockAndExceptionHandler
-   def pan( self, pos ):
+   def get_default_servo_pos(self, is_pan: bool) -> bool:
+      '''Get the default position of a servo motor
+
+      Args:
+         is_pan (bool): True for the pan motor and False for the tilt motor
+
+      Return:
+         the default postion of the servo motor
+      '''
+      return self.DEFAULT_PAN_POS if is_pan else self.DEFAULT_TILT_POS
+
+   @threadlock
+   def get_servo_pos(self, is_pan: bool) -> bool:
+      '''Get the current position of a servo motor
+
+      Args:
+         is_pan (bool): True for the pan motor and False for the tilt motor
+
+      Return:
+         the current postion of the servo motor
+      '''
+      return self.current_pan_pos if is_pan else self.current_tilt_pos
+
+   @threadlock
+   def pan(self, pos):
       '''Pan the camera for a certain degree'''
-      pos = max( self.PAN_DEGREE_MIN, pos )
-      pos = min( pos, self.PAN_DEGREE_MAX )
-      self._currentPanPos = pos
-      self._pan.rotate_servo( pos )
+      pos = max(self.PAN_DEGREE_MIN, pos)
+      pos = min(pos, self.PAN_DEGREE_MAX)
+      self.current_pan_pos = pos
+      self.servo_pan.rotate_servo(pos)
 
-   @_lockAndExceptionHandler
-   def getPanPos( self ):
-      '''Get the pan servo position in degree'''
-      return self._currentPanPos
-
-   @_lockAndExceptionHandler
-   def tilt( self, pos ):
+   @threadlock
+   def tilt(self, pos):
       '''Tilt the camera for a certain degree'''
-      pos = max( self.TILT_DEGREE_MIN, pos )
-      pos = min( pos, self.TILT_DEGREE_MAX )
-      self._currentTiltPos = pos
-      self._tilt.rotate_servo( pos )
+      pos = max(self.TILT_DEGREE_MIN, pos)
+      pos = min(pos, self.TILT_DEGREE_MAX)
+      self.current_tilt_pos = pos
+      self.servo_tilt.rotate_servo(pos)
 
-   @_lockAndExceptionHandler
-   def getTiltPos( self ):
-      '''Get the tilt servo position in degree'''
-      return self._currentTiltPos
 
 def main():
    '''A function to test the basic functionality of the robot'''
@@ -279,42 +293,42 @@ def main():
 
       # Move forward for 5 sec
       robot.forward()
-      time.sleep( 5 )
+      time.sleep(5)
 
       # Move left for 5 sec
       robot.left()
-      time.sleep( 5 )
+      time.sleep(5)
 
       # Move right for 5 sec
       robot.right()
-      time.sleep( 5 )
+      time.sleep(5)
 
       # Move backward for 5 sec
       robot.backward()
-      time.sleep( 5 )
+      time.sleep(5)
 
       # Stop the robot
       robot.stop()
 
       # Pan the camera left at 15 degree
-      robot.pan( 40 )
-      time.sleep( 1 )
+      robot.pan(40)
+      time.sleep(1)
       # Pan the camera right at 125 degree
-      robot.pan( 125 )
-      time.sleep( 1 )
+      robot.pan(125)
+      time.sleep(1)
 
       # Tilt the camera upward at 45 degree
-      robot.tilt( 45 )
-      time.sleep( 1 )
+      robot.tilt(45)
+      time.sleep(1)
       # Tilt the camera downward at 45 degree
-      robot.tilt( 120 )
-      time.sleep( 1 )
+      robot.tilt(120)
+      time.sleep(1)
 
       # Reset the camera position
       robot.reset()
 
    except Exception as e:
-      print( e )
+      print(e)
    finally:
       # Always stop the motor before the program terminates.
       if robot:
