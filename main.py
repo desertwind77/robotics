@@ -32,6 +32,7 @@ def main() -> None:
    '''The main program'''
    args = parser_arguments()
 
+   # Handle SIGINT and SIGTERM
    install_signal_handler()
    setup_logging(verbose=args.debug)
 
@@ -44,8 +45,6 @@ def main() -> None:
    input_monitor_thread.start()
    input_monitor_thread.help()
 
-   debug = False
-
    # TODO:
    # 1) Exit the main thread gracefully when an exception
    #    occurs in one of the threads.
@@ -55,7 +54,7 @@ def main() -> None:
          time.sleep(0.5)
    except Exception as e:
       print(e)
-      if debug:
+      if args.debug:
          # Print traceback
          traceback.print_exc()
    finally:
