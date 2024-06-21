@@ -16,6 +16,10 @@ from utils.board_gopigo3 import GoPiGoRobot
 from utils.input_monitor import InputMonitor
 
 
+# How often the main loop should run
+MAIN_LOOP_PERIOD = 0.02
+
+
 def parser_arguments() -> argparse.Namespace:
    '''Parse the command line argument
 
@@ -23,6 +27,8 @@ def parser_arguments() -> argparse.Namespace:
       argparse.Namespace: parsed command line arguments
    '''
    parser = argparse.ArgumentParser(description="Robot")
+   parser.add_argument("-a", "--avoid", action="store_true",
+                       help="Enable collision avoidance")
    parser.add_argument("-d", "--debug", action="store_true",
                        help="Print debug information")
    return parser.parse_args()
@@ -45,13 +51,26 @@ def main() -> None:
    input_monitor_thread.start()
    input_monitor_thread.help()
 
-   # TODO:
-   # 1) Exit the main thread gracefully when an exception
-   #    occurs in one of the threads.
    try:
-      while True:
+      last_voltage_time = last_distance_time = time.time()
+      while input_monitor_thread.is_alive():
+         cur_time = time.time()
+
+         time_voltage = cur_time - last_voltage_time
+         if time_voltage > robot.VOLTAGE_UPDATE_PERIOD:
+            robot.do_voltage_check()
+            last_voltage_time = cur_time
+            print('volt')
+
+         time_distance = cur_time - last_distance_time
+         if args.avoid and \
+               time_distance > robot.DISTANCE_UPDATE_PERIOD:
+            robot.do_collision_avoidance()
+            last_distance_time = cur_time
+            print('distance')
+
          # The main thread do nothing.
-         time.sleep(0.5)
+         time.sleep(MAIN_LOOP_PERIOD)
    except Exception as e:
       print(e)
       if args.debug:
