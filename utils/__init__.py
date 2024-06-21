@@ -9,26 +9,29 @@ import sys
 import threading
 
 
-class SignalException( Exception ):
+class SignalException(Exception):
    '''An exception used to terminate our multithreaded application'''
 
+class HardwareException(Exception):
+   '''An excetipn caused by hardware error'''
 
-class ThreadBase( threading.Thread ):
+
+class ThreadBase(threading.Thread):
    '''Base class for our threads'''
-   def __init__( self ) -> None:
-      super( ThreadBase, self ).__init__()
+   def __init__(self) -> None:
+      super(ThreadBase, self).__init__()
       self.name = 'ThreadBase'
       self.isExiting = threading.Event()
 
-   def shutdown( self ) -> None:
-      logging.info( 'Shutting down {}'.format( self.name ) )
+   def shutdown(self) -> None:
+      logging.info('Shutting down {}'.format(self.name))
       self.isExiting.set()
 
-   def run( self ) -> None:
+   def run(self) -> None:
       assert False, "This function expected to be implemented in a child class"
 
 
-def raise_term_exception( signum, stack ) -> Exception:
+def raise_term_exception(signum, stack) -> Exception:
    '''Raise SignalException so that our multithreaded programs can
    catch this exception and exit gracefully
 
@@ -37,14 +40,14 @@ def raise_term_exception( signum, stack ) -> Exception:
 
       stack (frame): the stack frame
    '''
-   logging.info( 'Caught signal {}'.format( signum ) )
+   logging.info('Caught signal {}'.format(signum))
    raise SignalException
 
 
 def install_signal_handler() -> None:
    '''Catch SIGINT and SIGTERM and terminate the program'''
-   signal.signal( signal.SIGINT, raise_term_exception )
-   signal.signal( signal.SIGTERM, raise_term_exception )
+   signal.signal(signal.SIGINT, raise_term_exception)
+   signal.signal(signal.SIGTERM, raise_term_exception)
 
 
 def setup_logging(filename: str = None, verbose: bool = False) -> None:
