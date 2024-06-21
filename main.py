@@ -42,6 +42,8 @@ def main() -> None:
    install_signal_handler()
    setup_logging(verbose=args.debug)
 
+   # Our audio player
+   audio_player = None
    # Our Robot hardware
    robot = GoPiGoRobot()
    # Create the InputMonitor thread to watch for the user's input
@@ -58,7 +60,9 @@ def main() -> None:
 
          time_voltage = cur_time - last_voltage_time
          if time_voltage > robot.VOLTAGE_UPDATE_PERIOD:
-            robot.do_voltage_check()
+            low_battery = robot.do_voltage_check()
+            if audio_player and low_battery:
+               audio_player.speak('Low Voltage Warning')
             last_voltage_time = cur_time
 
          time_distance = cur_time - last_distance_time

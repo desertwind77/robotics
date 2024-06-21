@@ -298,7 +298,8 @@ class GoPiGoRobot:
       self.servo_tilt.rotate_servo(pos)
 
    @threadlock
-   def do_voltage_check(self):
+   def do_voltage_check(self) -> bool:
+      '''Check if the voltage is low e.g. low battery'''
       lowVoltageMessage = \
             'Low Voltage Warning : threshold = {} volt, current =  {} volt'
 
@@ -306,12 +307,12 @@ class GoPiGoRobot:
       if voltage < GoPiGoRobot.LOW_VOLTAGE_THRESHOLD:
          logging.info(
                lowVoltageMessage.format(GoPiGoRobot.LOW_VOLTAGE_THRESHOLD, voltage))
-
-         if self.audio_player:
-            self.audio_player.speak('Low Voltage Warning')
+         return True
+      return False
 
    @threadlock
-   def do_collision_avoidance(self):
+   def do_collision_avoidance(self) -> None:
+      '''Check if collison is imminent'''
       if not self.sensor_distance:
          raise HardwareException
 
