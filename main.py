@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 '''
-The program to control the robot
+The main program for the GoPiGo3 robot
 1) Receive input from a USB gamepad
 2) Receive input from a USB keyboard
 3) Receive input from a web interface over the network
+4) Collision avoidance
+
+Caveats:
+- Need to press Ctrl-C multiple times to terminate the program
 '''
 
 import argparse
