@@ -60,14 +60,12 @@ def main() -> None:
          if time_voltage > robot.VOLTAGE_UPDATE_PERIOD:
             robot.do_voltage_check()
             last_voltage_time = cur_time
-            print('volt')
 
          time_distance = cur_time - last_distance_time
          if args.avoid and \
                time_distance > robot.DISTANCE_UPDATE_PERIOD:
             robot.do_collision_avoidance()
             last_distance_time = cur_time
-            print('distance')
 
          # The main thread do nothing.
          time.sleep(MAIN_LOOP_PERIOD)
