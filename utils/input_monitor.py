@@ -271,22 +271,26 @@ class InputMonitor(ThreadBase):
    def run(self) -> None:
       '''The main loop of the thread'''
       while not self.isExiting.is_set():
-         # Select the file description for input every 1 sec.
-         #
-         # If we are interested in only one device, we can use
-         # for event in device.read_loop(). But blocking call won't
-         # play well with thread's gracefull exit.
-         for key, mask in self.selector.select(timeout=1):
-            device = key.fileobj
-            if isinstance(device, socket.socket):
-               # Handle network input
-               self.process_network_input(device)
-            elif self.is_joypad(device):
-               # Handle a USB joypad input
-               self.process_gamepad_input(device)
-            elif self.is_keyboard(device):
-               # Handle a USB keyboard input
-               self.process_keyboard_input(device)
+         try:
+            # Select the file description for input every 1 sec.
+            #
+            # If we are interested in only one device, we can use
+            # for event in device.read_loop(). But blocking call won't
+            # play well with thread's gracefull exit.
+            for key, mask in self.selector.select(timeout=1):
+               device = key.fileobj
+               if isinstance(device, socket.socket):
+                  # Handle network input
+                  self.process_network_input(device)
+               elif self.is_joypad(device):
+                  # Handle a USB joypad input
+                  self.process_gamepad_input(device)
+               elif self.is_keyboard(device):
+                  # Handle a USB keyboard input
+                  self.process_keyboard_input(device)
+         except Exception as e:
+            logging.error(e)
+            return
 
    def help(self) -> None:
       '''Print the help message'''
