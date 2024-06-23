@@ -12,7 +12,7 @@ class LineFollowingRobot(GoPiGoRobot):
     ''' This is a very crude line following robot. It just use brute force
     appraoch.'''
 
-    def do_basic_line_following(self):
+    def do_line_following(self):
         position = self.get_line_position()
         logging.debug('Line position = {}'.format(position))
 
@@ -32,7 +32,7 @@ class LineFollowingRobot(GoPiGoRobot):
         running = True
         while running:
             try:
-                self.do_basic_line_following()
+                self.do_line_following()
             except (OSError, SignalException) as e:
                 # Exit the main loop in the next iteration
                 running = False
