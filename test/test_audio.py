@@ -1,13 +1,21 @@
 #!/usr/bin/env python3
+'''
+Test the audio player
+
+This file needs to be run from the root of the repository because audio.json is
+located there.
+'''
 import json
 import time
 
 #------------------------------ Hack ---------------------------------------#
 # This is ugly but I cannot find the solution to keep this file structure yet
+import os
 import sys
 from pathlib import Path
-path = Path(__file__)
-repo_path = path.parent.parent.absolute()
+file_path = Path(__file__)
+dir_path = str(file_path.parent.absolute())
+repo_path = os.path.join(dir_path,os.pardir)
 sys.path.append(str(repo_path))
 #---------------------------------------------------------------------------#
 
