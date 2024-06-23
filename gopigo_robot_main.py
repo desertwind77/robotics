@@ -18,6 +18,7 @@ from utils.gopigo3_board import GoPiGoRobot
 from utils.gopigo3_remote_robot import RemoteRobot
 from utils.gopigo3_line_robot import LineFollowingRobot
 from utils.gopigo3_pid_robot import PIDLineFollowingRobot
+from utils.gopigo3_ball_robot import BallTrackingRobot
 
 
 def parser_arguments() -> argparse.Namespace:
@@ -50,6 +51,11 @@ def parser_arguments() -> argparse.Namespace:
 
     # Ball tracking robot
     ball_parser = subparser.add_parser('ball', help='Ball tracking robot')
+    ball_parser.add_argument("-c", "--color", action="store",
+                             default="Green", choices=["Green", "Blue"],
+                             help="Choose the ball color")
+    ball_parser.add_argument("-d", "--display", action="store_true",
+                             help="Display the video frame on the screen")
 
     return parser.parse_args()
 
@@ -78,7 +84,8 @@ def main() -> None:
         robot = PIDLineFollowingRobot()
         robot.run(args.debug)
     elif args.command == 'ball':
-        pass
+        robot = BallTrackingRobot(args.color)
+        robot.run(args.display, args.debug)
 
 if __name__ == '__main__':
    main()
