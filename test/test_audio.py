@@ -26,7 +26,7 @@ from utils.audio_player import AudioPlayer
 def main():
     install_signal_handler()
 
-    with open('audio.json', 'r', encoding='utf-8') as file:
+    with open('audio_config.json', 'r', encoding='utf-8') as file:
         audio_config = json.load(file)
         audio_config = audio_config['library']
 
