@@ -1,0 +1,95 @@
+<html>
+<head>
+<meta charset="utf-8">
+<title>Raspberry Pi - Surveillance Camera</title>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"
+        integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+        crossorigin="anonymous"></script>
+<style>
+table, td, th {
+   vertical-align: top;
+   border-spacing: 20;
+}
+p.big {
+   line-height: 1.8;
+}
+</style>
+</head>
+
+<body>
+<center><h1>Curious George Surveillance Robot</h1></center>
+<table style="margin-left:auto;margin-right:auto;">
+   <tr>
+      <td>
+         <center><img src="stream.mjpg" width="640" height="480"></center>
+      </td>
+      <td>
+         <p class="big">
+            Motion Control:
+            <br/>
+            <button type="button" class="btn btn-default" id="move-left"> < </button>
+            <button type="button" class="btn btn-default" id="move-forward"> ^ </button>
+            <button type="button" class="btn btn-default" id="move-backward"> v </button>
+            <button type="button" class="btn btn-default" id="move-right"> > </button>
+            <button type="button" class="btn btn-danger"  id="move-stop">Stop</button>
+            <button type="button" class="btn btn-default" id="move-unpark">Unpark</button>
+            <br/>
+            Keyboard:
+            <input type="text" id="keycontrol" name="keycontrol" maxlength="1">
+            <br/>
+            (j = left, i = forward, k = backward, l = right)
+            <br/>
+            Set speed:
+            <input type="range" min="300" max="1000" value="500" step="10" id="set-speed">
+         </p>
+         <p class="big">
+            Servo Motor Control:
+            <br/>
+            Pan:
+            <button type="button" class="btn btn-default" id="pan-left"> < </button>
+            <button type="button" class="btn btn-default" id="pan-right"> > </button>
+            Tilt:
+            <button type="button" class="btn btn-default" id="tilt-down"> v </button>
+            <button type="button" class="btn btn-default" id="tilt-up"> ^ </button>
+         </p>
+         <p class="big">
+            Speak:
+            <input type="text" id="speak" name="speak">
+         </p>
+      </td>
+   </tr>
+</table>
+
+<script>
+$( '#move-unpark' ).on( 'click', function(){ $.get( '/unpark' ); } );
+$( '#move-stop' ).on( 'click', function(){ $.get( '/stop' ); } );
+$( '#move-forward').on( 'click', function(){ $.get( '/forward' ); } );
+$( '#move-backward').on( 'click', function(){ $.get( '/backward' ); } );
+$( '#move-left').on( 'click', function(){ $.get( '/left' ); } );
+$( '#move-right').on( 'click', function(){ $.get( '/right' ); } );
+$( '#pan-left').on( 'click', function(){ $.get( '/pan_left' ); } );
+$( '#pan-right').on( 'click', function(){ $.get( '/pan_right' ); } );
+$( '#tilt-up').on( 'click', function(){ $.get( '/tilt_up' ); } );
+$( '#tilt-down').on( 'click', function(){ $.get( '/tilt_down' ); } );
+$( '#set-speed' ).on( 'change', function(){ $.get( '/set_speed/' + this.value ); } );
+$( '#keycontrol' ).on( 'keydown',
+   function() {
+      if ( this.value == 'j' ) {
+         $.get( '/left' );
+      } else if ( this.value == 'k' ) {
+         $.get( '/backward' );
+      } else if ( this.value == 'l' ) {
+         $.get( '/right' );
+      } else if ( this.value == 'i' ) {
+         $.get( '/forward' );
+      }
+   } )
+$( '#keycontrol' ).on( 'keyup',
+   function() {
+      $.get( '/stop' );
+      this.value = ''
+   } )
+</script>
+
+</body>
+</html>
