@@ -200,8 +200,8 @@ class GoPiGoRobot:
     @threadlock
     def set_motor_speed(self, newSpeed, is_left: bool = False) -> None:
         '''Set the speed of the left motor'''
-        motor = self.gogigo.MOTOR_LEFT if is_left else self.gopigo.MOTOR_RIGHTi
-        self.gopigo.set_motor_dps(self.gopigo.MOTOR_LEFT, dps=newSpeed)
+        motor = self.gopigo.MOTOR_LEFT if is_left else self.gopigo.MOTOR_RIGHT
+        self.gopigo.set_motor_dps(motor, dps=newSpeed)
 
     def accelerate(self) -> None:
         '''Accelerate for 100 degree per second'''
