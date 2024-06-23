@@ -132,20 +132,25 @@ class PIDRobot(GoPiGoRobot):
         self.left_motor_speed = max(1, int(self.current_speed + correction))
         self.right_motor_speed = max(1, int(self.current_speed - correction))
 
-        if self.current_motion != Direction.STOP:
-           debugMsg = 'Pos: {} Error: {} Correction: {} Left: {} Right: {}'
-           debugMsg = debugMsg.format(current_position, current_error, correction,
+        if self.get_current_motion() != Direction.STOP:
+            # It is important to call get_current_motion which is mutually exclusive
+            # because the underlying attribute self.current_motion is also accessed by
+            # the main thread. Specifically, the main thread may call stop() which
+            # also set this attribute. Failed to do so, the robot may still move
+            # forward although the 's' key was pressed to stop the robot.
+            debugMsg = 'Pos: {} Error: {} Correction: {} Left: {} Right: {}'
+            debugMsg = debugMsg.format(current_position, current_error, correction,
                                        self.left_motor_speed, self.right_motor_speed)
-           if current_position != self.target_position:
-              logging.debug(debugMsg)
+            if current_position != self.target_position:
+                logging.debug(debugMsg)
 
-           self.set_motor_speed(self.left_motor_speed, is_left=True)
-           self.set_motor_speed(self.right_motor_speed, is_left=False)
+            self.set_motor_speed(self.left_motor_speed, is_left=True)
+            self.set_motor_speed(self.right_motor_speed, is_left=False)
 
         endTime = time.time()
         elapsedTime = endTime - begin_time
         if elapsedTime < update_period:
-           time.sleep(update_period - elapsedTime)
+            time.sleep(update_period - elapsedTime)
 
 
 class RobotControlThread(ThreadBase):
@@ -175,10 +180,10 @@ class RobotControlThread(ThreadBase):
             msg = "Thread {} threw an exception: {}".format(
                     self.name, self.thread_exception[1])
             new_exception = Exception(msg)
-            raise new_exceptoin.with_traceback(self.thread_exception[2])
+            raise new_exception.with_traceback(self.thread_exception[2])
 
 
-class Robot(object):
+class PIDLineFollowingRobot(object):
     '''The complete robot class that have both the base board with PID line
     following and the RobotControlThread'''
 
@@ -192,7 +197,7 @@ class Robot(object):
     def __init__(self) -> None:
         '''Constructure'''
         self.key_binding = [
-            Key('b', 'calibrate_black', 'Set the black point for line sensor'),
+            Key('b', 'calibrate_black', 'Set the black point for line sensor (default)'),
             Key('w', 'calibrate_white', 'Set the white point for line sonsor'),
             Key('u', 'inc_kp_gain', 'Increase the Kp gain'),
             Key('j', 'dec_kp_gain', 'Decrease the Kp gain'),
@@ -205,6 +210,7 @@ class Robot(object):
             Key('2', 'dec_pid_sampling_freq', 'Decrease the PID update frequency'),
             Key('3', 'inc_speed', 'Increase the robot speed'),
             Key('4', 'dec_speed', 'Decrease the robot speed'),
+            Key('h', 'print_help', 'Print help message'),
             Key('g', 'start', 'Start the robot'),
             Key('s', 'stop', 'Stop the robot'),
             Key('q', 'exit', 'Exit the program'),
@@ -222,17 +228,21 @@ class Robot(object):
         for k in self.key_binding:
             self.dispatch_table[ k.key ] = getattr(self, k.func)
 
-        # Print the key binding
-        for k in self.key_binding:
-            print('{}\t{}'.format(k.key, k.descr))
-        print()
-
         self.robot = PIDRobot()
-        self.robot.set_speed(Robot.INIT_SPEED)
+        self.robot.set_speed(PIDLineFollowingRobot.INIT_SPEED)
         self.robot_control_thread = RobotControlThread(self.robot)
         self.robot_control_thread.start()
         # Enble the main input loop
         self.running = True
+
+        self.print_help()
+
+    def print_help(self) -> None:
+        '''Print the key binding'''
+        for k in self.key_binding:
+            print('{}\t{}'.format(k.key, k.descr))
+        print()
+
 
     def cleanup(self) -> None:
         '''Stop the robot and shutdown the robot control thread'''
@@ -270,41 +280,41 @@ class Robot(object):
 
     def calibrate_black(self) -> None:
         '''Calibrate the line following sensor to black'''
-        self.robot.calibrate('black')
+        self.robot.set_line_type('black')
 
     def calibrate_white(self) -> None:
         '''Calibrate the line following sensor to white'''
-        self.robot.calibrate('white')
+        self.robot.set_line_type('white')
 
     def inc_kp_gain(self) -> None:
         '''Increase Kp gain'''
         cur_kp = self.robot.get_kp()
-        self.robot.set_kp(cur_kp + Robot.STEP_KP)
+        self.robot.set_kp(cur_kp + PIDLineFollowingRobot.STEP_KP)
 
     def dec_kp_gain(self) -> None:
         '''Decrease Kp gain'''
         cur_kp = self.robot.get_kp()
-        self.robot.set_kp(cur_kp - Robot.STEP_KP)
+        self.robot.set_kp(cur_kp - PIDLineFollowingRobot.STEP_KP)
 
     def inc_ki_gain(self) -> None:
         '''Increase Ki gain'''
         cur_ki = self.robot.get_ki()
-        self.robot.set_ki(cur_ki + Robot.STEP_KI)
+        self.robot.set_ki(cur_ki + PIDLineFollowingRobot.STEP_KI)
 
     def dec_ki_gain(self) -> None:
         '''Decrease Ki gain'''
         cur_ki = self.robot.get_ki()
-        self.robot.set_ki(cur_ki - Robot.STEP_KI)
+        self.robot.set_ki(cur_ki - PIDLineFollowingRobot.STEP_KI)
 
     def inc_kd_gain(self) -> None:
         '''Increase Kd gain'''
         cur_kd = self.robot.get_kd()
-        self.robot.set_kd(cur_kd + Robot.STEP_KD)
+        self.robot.set_kd(cur_kd + PIDLineFollowingRobot.STEP_KD)
 
     def dec_kd_gain(self) -> None:
         '''Decrease Kd gain'''
         cur_kd = self.robot.get_kd()
-        self.robot.set_kd(cur_kd - Robot.STEP_KD)
+        self.robot.set_kd(cur_kd - PIDLineFollowingRobot.STEP_KD)
 
     def reset_error_area(self) -> None:
         '''Reset the error area'''
@@ -313,22 +323,22 @@ class Robot(object):
     def inc_pid_sampling_freq(self) -> None:
         '''Increase the sampling frequency'''
         curFreq = self.robot.get_update_freq()
-        self.robot.set_update_freq(curFreq + Robot.STEP_FREQ)
+        self.robot.set_update_freq(curFreq + PIDLineFollowingRobot.STEP_FREQ)
 
     def dec_pid_sampling_freq(self) -> None:
         '''Decrease the sampling frequency'''
         curFreq = self.robot.get_update_freq()
-        self.robot.set_update_freq(curFreq - Robot.STEP_FREQ)
+        self.robot.set_update_freq(curFreq - PIDLineFollowingRobot.STEP_FREQ)
 
     def inc_speed(self) -> None:
         '''Decrease speed'''
         cur_speed = self.robot.get_speed(is_km_per_hr=False)
-        self.robot.set_speed(cur_speed + Robot.STEP_SPEED)
+        self.robot.set_speed(cur_speed + PIDLineFollowingRobot.STEP_SPEED)
 
     def dec_speed(self) -> None:
         '''Decrease speed'''
         cur_speed = self.robot.get_speed(is_km_per_hr=False)
-        self.robot.set_speed(cur_speed - Robot.STEP_SPEED)
+        self.robot.set_speed(cur_speed - PIDLineFollowingRobot.STEP_SPEED)
 
     def start(self) -> None:
         '''Start following the line'''
@@ -353,7 +363,8 @@ class Robot(object):
                     # This is similar to the select system call which waits for the keyboard
                     # input for inputPeriod. None is return in case of no input.
                     key = keyInput.send(inputPeriod)
-                    self.dispatch(key)
+                    if key:
+                        self.dispatch(key)
 
                     # Check if the robot_control_thread thread caught any exception
                     # Note that self.robot_control_thread should not be None. But I check
