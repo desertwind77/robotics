@@ -14,6 +14,7 @@ import argparse
 import json
 import os
 from utils import setup_logging
+from utils.gopigo3_board import GoPiGoRobot
 from utils.gopigo3_remote_robot import RemoteRobot
 from utils.gopigo3_line_robot import LineFollowingRobot
 from utils.gopigo3_pid_robot import PIDLineFollowingRobot
@@ -31,16 +32,23 @@ def parser_arguments() -> argparse.Namespace:
     subparser = parser.add_subparsers(dest='command')
     subparser.required = True
 
+    # Reset the robot
+    reset_parser = subparser.add_parser('reset', help='Reset the robot')
+
+    # Robot with remote control, web control and collision avoidance
     remote_parser = subparser.add_parser('remote', help='Remote control robot')
     remote_parser.add_argument("-a", "--avoid", action="store_true",
                                help="Enable collision avoidance")
     remote_parser.add_argument("-A", "--audio", action="store",
                                help="Audio configuration file"),
 
+    # Basic line follower
     line_parser = subparser.add_parser('line', help='Basic line following robot')
 
+    # PID line follower
     pid_parser = subparser.add_parser('pid', help='Basic line following robot')
 
+    # Ball tracking robot
     ball_parser = subparser.add_parser('ball', help='Ball tracking robot')
 
     return parser.parse_args()
@@ -50,7 +58,10 @@ def main() -> None:
     args = parser_arguments()
     setup_logging(verbose=args.debug)
 
-    if args.command == 'remote':
+    if args.command == 'reset':
+        robot = GoPiGoRobot()
+        robot.reset()
+    elif args.command == 'remote':
         audio_config = None
         if args.audio:
             assert os.path.exists(args.audio)
@@ -68,7 +79,6 @@ def main() -> None:
         robot.run(args.debug)
     elif args.command == 'ball':
         pass
-
 
 if __name__ == '__main__':
    main()
