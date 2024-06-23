@@ -2,15 +2,15 @@
    "library" : [
       {
          "name": "Baby Shark",
-         "path": "sound/shark.mp3"
+         "path": "assets/sound/shark.mp3"
       },
       {
          "name": "Baa Baa Black Sheep",
-         "path": "sound/sheep.mp3"
+         "path": "assets/sound/sheep.mp3"
       },
       {
          "name": "Twinkle Twinkle Little Stars",
-         "path": "sound/twinkle.mp3"
+         "path": "assets/sound/twinkle.mp3"
       }
    ]
 }
