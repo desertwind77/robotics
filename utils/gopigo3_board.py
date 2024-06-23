@@ -99,7 +99,7 @@ class GoPiGoRobot:
         '''Release the hardware lock'''
         self.robot_control_lock.release()
 
-    def threadlock(origFunc):
+    def thread_lock(origFunc):
         '''A decorator to handle thread lock and exception'''
         def wrapper(self, *args, **kwargs):
             result = None
@@ -113,55 +113,55 @@ class GoPiGoRobot:
             return result
         return wrapper
 
-    @threadlock
+    @thread_lock
     def get_board(self) -> str:
         '''Get the board name'''
         return self.gopigo.get_board()
 
-    @threadlock
+    @thread_lock
     def get_serial_number(self) -> str:
         '''Get the serial number'''
         return self.gopigo.get_id()
 
-    @threadlock
+    @thread_lock
     def get_manufacturer(self) -> str:
         '''Get the manufacturere name'''
         return self.gopigo.get_manufacturer()
 
-    @threadlock
+    @thread_lock
     def get_hardware(self) -> str:
         '''Get the hardware version'''
         return self.gopigo.get_version_hardware()
 
-    @threadlock
+    @thread_lock
     def get_firmware(self) -> str:
         '''Get the firmware version'''
         return self.gopigo.get_version_firmware()
 
-    @threadlock
+    @thread_lock
     def get_voltage(self) -> int:
         '''Get the battery voltage from the main circuit'''
         return self.gopigo.get_voltage_battery()
 
-    @threadlock
+    @thread_lock
     def get_voltage5V(self) -> int:
         '''Get the battery voltage from the 5V circuit'''
         return self.gopigo.get_voltage_5v()
 
-    @threadlock
+    @thread_lock
     def set_line_type(self, lineType) -> None:
         '''Select the line color for the line following sensor'''
         assert lineType in [ 'black', 'white' ]
         self.sensor_line.set_calibration(lineType)
 
-    @threadlock
+    @thread_lock
     def get_line_position(self, weightedAvg: bool = False) -> float:
         '''Read the value from the line following sensor'''
         if weightedAvg:
             return self.sensor_line.read('weighted-avg')
         return self.sensor_line.position()
 
-    @threadlock
+    @thread_lock
     def get_distance(self) -> float:
         '''Get the frontal distance from the distance sensor'''
         if self.sensor_distance:
@@ -182,12 +182,12 @@ class GoPiGoRobot:
             result = speed_in_km_per_hr
         return result
 
-    @threadlock
+    @thread_lock
     def get_speed(self, is_km_per_hr=True) -> float:
         '''The thread-safe version of get_speed_unlock'''
         return self.get_speed_unlock(is_km_per_hr=is_km_per_hr)
 
-    @threadlock
+    @thread_lock
     def set_speed(self, newSpeed) ->  None:
         '''Set the current speed'''
         if newSpeed < GoPiGoRobot.SPEED_MIN_DPS:
@@ -197,7 +197,7 @@ class GoPiGoRobot:
         self.gopigo.set_speed(in_speed=newSpeed)
         self.current_speed = newSpeed
 
-    @threadlock
+    @thread_lock
     def set_motor_speed(self, newSpeed, is_left: bool = False) -> None:
         '''Set the speed of the left motor'''
         motor = self.gopigo.MOTOR_LEFT if is_left else self.gopigo.MOTOR_RIGHT
@@ -217,40 +217,45 @@ class GoPiGoRobot:
             self.set_speed(newSpeed)
             self.current_speed = newSpeed
 
-    @threadlock
-    def forward(self):
+    @thread_lock
+    def forward(self) -> None:
         if not self.imminent_collision:
             self.gopigo.forward()
             self.current_motion = Direction.FORWARD
 
-    @threadlock
-    def backward(self):
+    @thread_lock
+    def backward(self) -> None:
         if self.current_motion != Direction.BACKWARD:
             self.gopigo.backward()
             self.imminent_collision = False
             self.current_motion = Direction.BACKWARD
 
-    @threadlock
-    def left(self):
+    @thread_lock
+    def left(self) -> None:
         if self.current_motion != Direction.LEFT:
             self.gopigo.left()
             self.imminent_collision = False
             self.current_motion = Direction.LEFT
 
-    @threadlock
-    def right(self):
+    @thread_lock
+    def right(self) -> None:
         if self.current_motion != Direction.RIGHT:
             self.gopigo.right()
             self.imminent_collision = False
             self.current_motion = Direction.RIGHT
 
-    @threadlock
-    def stop(self):
+    @thread_lock
+    def stop(self) -> None:
         '''Stop the robot from moving'''
         if self.current_motion != Direction.STOP:
             self.gopigo.stop()
             self.imminent_collision = False
             self.current_motion = Direction.STOP
+
+    @thread_lock
+    def get_current_motion(self) -> Direction:
+        '''Return the current direction'''
+        return self.current_motion
 
     def get_default_servo_pos(self, is_pan: bool) -> int:
         '''Get the default position of a servo motor
@@ -263,7 +268,7 @@ class GoPiGoRobot:
         '''
         return self.DEFAULT_PAN_POS if is_pan else self.DEFAULT_TILT_POS
 
-    @threadlock
+    @thread_lock
     def get_servo_pos(self, is_pan: bool) -> int:
         '''Get the current position of a servo motor
 
@@ -275,7 +280,7 @@ class GoPiGoRobot:
         '''
         return self.current_pan_pos if is_pan else self.current_tilt_pos
 
-    @threadlock
+    @thread_lock
     def pan(self, pos: int) -> None:
         '''Pan the camera for a certain degree'''
         pos = max(self.PAN_DEGREE_MIN, pos)
@@ -283,7 +288,7 @@ class GoPiGoRobot:
         self.current_pan_pos = pos
         self.servo_pan.rotate_servo(pos)
 
-    @threadlock
+    @thread_lock
     def tilt(self, pos: int) -> None:
         '''Tilt the camera for a certain degree'''
         pos = max(self.TILT_DEGREE_MIN, pos)
