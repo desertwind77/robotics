@@ -1,2 +1,2 @@
 #!/bin/sh
-./gopigo.py -d remote -a -A audio.json
+./gopigo_robot.py -d remote -a -A audio.json
