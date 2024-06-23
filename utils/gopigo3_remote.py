@@ -7,9 +7,9 @@ import time
 import traceback
 
 from utils import install_signal_handler, SignalException
-from utils.board_gopigo3 import GoPiGoRobot
 from utils.audio_player import AudioPlayer
 from utils.input_monitor import InputMonitor
+from utils.gopigo3_board import GoPiGoRobot
 
 
 class ThreadOperation(Enum):

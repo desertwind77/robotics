@@ -2,10 +2,7 @@
 # A class to control the basic functions of the robot
 
 from enum import Enum
-import logging
 import threading
-import time
-import traceback
 
 from easygopigo3 import EasyGoPiGo3
 from di_sensors.easy_line_follower import EasyLineFollower
