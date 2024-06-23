@@ -11,6 +11,8 @@ Caveats:
 '''
 
 import argparse
+import json
+import os
 from utils import setup_logging
 from utils.board_gopigo3 import RemoteRobot
 
@@ -24,6 +26,8 @@ def parser_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Robot")
     parser.add_argument("-a", "--avoid", action="store_true",
                         help="Enable collision avoidance")
+    parser.add_argument("-A", "--audio", action="store",
+                        help="Audio configuration file"),
     parser.add_argument("-d", "--debug", action="store_true",
                         help="Print debug information")
     return parser.parse_args()
@@ -32,7 +36,15 @@ def parser_arguments() -> argparse.Namespace:
 def main() -> None:
     args = parser_arguments()
     setup_logging(verbose=args.debug)
-    robot = RemoteRobot()
+
+    audio_config = None
+    if args.audio:
+        assert os.path.exists(args.audio)
+        with open(args.audio, 'r', encoding='utf-8') as file:
+            audio_config = json.load(file)
+            audio_config = audio_config['library']
+
+    robot = RemoteRobot(audio_config)
     robot.run(args.avoid, args.debug)
 
 
