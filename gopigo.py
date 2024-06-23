@@ -15,7 +15,8 @@ import json
 import os
 from utils import setup_logging
 from utils.gopigo3_remote import RemoteRobot
-from utils.gopigo3_line_following import LineFolllowingRobot
+from utils.gopigo3_line import LineFolllowingRobot
+from utils.gopigo3_pid import PIDRobot
 
 
 def parser_arguments() -> argparse.Namespace:
@@ -63,7 +64,8 @@ def main() -> None:
         robot = LineFollowingRobot()
         robot.run(args.debug)
     elif args.command == 'pid':
-        pass
+        robot = PIDRobot()
+        robot.run(args.debug)
     elif args.command == 'ball':
         pass
 
