@@ -270,7 +270,7 @@ class InputMonitor(ThreadBase):
 
     def run(self) -> None:
         '''The main loop of the thread'''
-        while not self.isExiting.is_set():
+        while not self.is_exiting.is_set():
             try:
                 # Select the file description for input every 1 sec.
                 #

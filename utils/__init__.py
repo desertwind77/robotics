@@ -18,11 +18,11 @@ class ThreadBase(threading.Thread):
    def __init__(self) -> None:
       super(ThreadBase, self).__init__()
       self.name = 'ThreadBase'
-      self.isExiting = threading.Event()
+      self.is_exiting = threading.Event()
 
    def shutdown(self) -> None:
       logging.info('Shutting down {}'.format(self.name))
-      self.isExiting.set()
+      self.is_exiting.set()
 
    def run(self) -> None:
       assert False, "This function expected to be implemented in a child class"
