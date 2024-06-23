@@ -11,6 +11,7 @@ from easygopigo3 import EasyGoPiGo3
 from di_sensors.easy_line_follower import EasyLineFollower
 
 from utils import install_signal_handler, SignalException
+from utils.audio_player import AudioPlayer
 from utils.input_monitor import InputMonitor
 
 
@@ -247,7 +248,7 @@ class GoPiGoRobot:
     def right(self):
         if self.current_motion != Direction.RIGHT:
             self.gopigo.right()
-            self.imminent_collision = Falsei
+            self.imminent_collision = False
             self.current_motion = Direction.RIGHT
 
     @threadlock
@@ -316,9 +317,9 @@ class RemoteRobot(GoPiGoRobot):
     # The main loop interval
     MAIN_LOOP_PERIOD = 0.02
 
-    def __init__(self):
+    def __init__(self, audio_config):
         super(RemoteRobot, self).__init__()
-        self.audio_player = None
+        self.audio_player = AudioPlayer(audio_config)
         self.threads = []
 
     def initialize(self):
@@ -425,57 +426,3 @@ class RemoteRobot(GoPiGoRobot):
             # Stop the robot and reset all the servo motors
             self.reset()
             logging.info('Good Bye!')
-
-
-def main():
-   '''A function to test the basic functionality of the robot'''
-   robot = None
-   try:
-      # Create a robot object
-      robot = GoPiGoRobot()
-
-      # Move forward for 5 sec
-      robot.forward()
-      time.sleep(5)
-
-      # Move left for 5 sec
-      robot.left()
-      time.sleep(5)
-
-      # Move right for 5 sec
-      robot.right()
-      time.sleep(5)
-
-      # Move backward for 5 sec
-      robot.backward()
-      time.sleep(5)
-
-      # Stop the robot
-      robot.stop()
-
-      # Pan the camera left at 15 degree
-      robot.pan(40)
-      time.sleep(1)
-      # Pan the camera right at 125 degree
-      robot.pan(125)
-      time.sleep(1)
-
-      # Tilt the camera upward at 45 degree
-      robot.tilt(45)
-      time.sleep(1)
-      # Tilt the camera downward at 45 degree
-      robot.tilt(120)
-      time.sleep(1)
-
-      # Reset the camera position
-      robot.reset()
-
-   except Exception as e:
-      print(e)
-   finally:
-      # Always stop the motor before the program terminates.
-      if robot:
-         robot.reset()
-
-if __name__ == '__main__':
-   main()
