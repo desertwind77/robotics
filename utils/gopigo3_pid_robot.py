@@ -245,10 +245,10 @@ class Robot(object):
         '''Handle the user input from keyboard'''
         if not key:
             return
-
-        if (func := self.dispatch_table.get(key, None)):
-            func()
-            self.print_current_state()
+        if key not in self.dispatch_table:
+            return
+        self.dispatch_table[key]()
+        self.print_current_state()
 
     def print_current_state(self) -> None:
         '''Print the current Robot state especially the PID value'''
