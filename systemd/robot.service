@@ -1,0 +1,18 @@
+# /lib/systemd/system/robot.service
+#
+# TODO: copy this file to /etc/systemd/system
+#
+[Unit]
+Description=Remote Control Robot Service
+# FIXME: Sending audio to the bluetooth speaker doesn't work when starting the
+# robot via systemd
+After=bluetooth.service
+
+[Service]
+WorkingDirectory=/home/pi/Workspace/github/robotics
+User=pi
+Type=simple
+ExecStart=/home/pi/Workspace/github/robotics/gopigo_remote_robot.sh
+
+[Install]
+WantedBy=multi-user.target

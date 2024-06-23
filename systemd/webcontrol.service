@@ -1,0 +1,16 @@
+# /lib/systemd/system/remotecontrol.service
+#
+# TODO: copy this file to /etc/systemd/system
+#
+[Unit]
+Description=WebControl Service
+After=bluetooth.service
+
+[Service]
+WorkingDirectory=/home/pi/Workspace/github/robotics
+User=pi
+Type=simple
+ExecStart=/home/pi/Workspace/github/robotics/gopigo_web_server.py
+
+[Install]
+WantedBy=multi-user.target
