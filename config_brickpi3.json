@@ -1,0 +1,29 @@
+{
+   "mode" : "remote",
+   "robots" : {
+      "remote" : {
+         "description" : "A Infrared-remote-controlled robot",
+         "devices" : {
+            "motors" : {
+               "Left Motor" : {
+                  "port" : "Port B",
+                  "power" : 100
+               },
+               "Right Motor" : {
+                  "port" : "Port C",
+                  "power" : 100
+               }
+            },
+            "sensors" : {
+               "Gyro" : {
+                  "port" : "Port 1"
+               },
+               "Infrared Remote" : {
+                  "channel" : 1,
+                  "port" : "Port 3"
+               }
+            }
+         }
+      }
+   }
+}
