@@ -12,9 +12,6 @@ import threading
 class SignalException(Exception):
    '''An exception used to terminate our multithreaded application'''
 
-class HardwareException(Exception):
-   '''An excetipn caused by hardware error'''
-
 
 class ThreadBase(threading.Thread):
    '''Base class for our threads'''
