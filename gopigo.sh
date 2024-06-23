@@ -1,2 +1,2 @@
 #!/bin/sh
-./main.py -d -a -A audio.json
+./gopigo.py -d -a -A audio.json

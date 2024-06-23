@@ -14,7 +14,7 @@ import argparse
 import json
 import os
 from utils import setup_logging
-from utils.board_gopigo3 import RemoteRobot
+from utils.gopigo3_remote import RemoteRobot
 
 
 def parser_arguments() -> argparse.Namespace:
