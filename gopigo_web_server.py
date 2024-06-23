@@ -119,7 +119,8 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
         elif self.path == '/stream.mjpg':
             self.handle_video_stream()
         elif self.path in [ '/forward', '/backward', '/left', '/right', '/stop',
-                            '/pan_left', '/pan_right', '/tilt_up', '/tilt_down' ]:
+                            '/pan_left', '/pan_right', '/tilt_up', '/tilt_down',
+                            '/reset' ]:
             command = self.path[1:]
             self.handle_command(command)
         elif '/set_speed' in self.path:

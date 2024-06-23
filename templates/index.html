@@ -33,6 +33,7 @@ p.big {
             <button type="button" class="btn btn-default" id="move-right"> > </button>
             <button type="button" class="btn btn-danger"  id="move-stop">Stop</button>
             <button type="button" class="btn btn-default" id="move-unpark">Unpark</button>
+            <button type="button" class="btn btn-default" id="move-reset">Reset</button>
             <br/>
             Keyboard:
             <input type="text" id="keycontrol" name="keycontrol" maxlength="1">
@@ -61,6 +62,7 @@ p.big {
 </table>
 
 <script>
+$( '#move-reset' ).on( 'click', function(){ $.get( '/reset' ); } );
 $( '#move-unpark' ).on( 'click', function(){ $.get( '/unpark' ); } );
 $( '#move-stop' ).on( 'click', function(){ $.get( '/stop' ); } );
 $( '#move-forward').on( 'click', function(){ $.get( '/forward' ); } );

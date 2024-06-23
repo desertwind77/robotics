@@ -255,18 +255,20 @@ class InputMonitor(ThreadBase):
             self.robot.right()
         elif message == 'stop':
             self.robot.stop()
+        elif message == 'reset':
+            self.robot.reset()
         elif message in ['pan_left', 'pan_right']:
             diff = 10 if message == 'pan_left' else -10
-            pos = self.robot.getPanPos() + diff
+            pos = self.robot.get_servo_pos(is_pan=True) + diff
             self.robot.pan(pos)
         elif message in ['tilt_down', 'tilt_up']:
             diff = 10 if message == 'tilt_down' else -10
-            pos = self.robot.getTiltPos() + diff
+            pos = self.robot.get_servo_pos(is_pan=False) + diff
             self.robot.tilt(pos)
         elif 'speed=' in message:
             speed = message[len('speed='):]
             speed = int(speed)
-            self.robot.setSpeed(speed)
+            self.robot.set_speed(speed)
 
     def run(self) -> None:
         '''The main loop of the thread'''
