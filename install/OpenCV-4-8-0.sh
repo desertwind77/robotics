@@ -1,4 +1,9 @@
 #!/bin/bash
+# A script to install OpenCV on Raspberry Pi
+#
+# Source:
+# https://qengineering.eu/install%20opencv%20on%20raspberry%20pi%205.html
+
 set -e
 install_opencv () {
 echo ""
