@@ -4,35 +4,57 @@
 from pathlib import Path
 import argparse
 import json
+import logging
 import os
 import time
 
+from utils import setup_logging
 from utils.brickpi3_board import BrickPiEV3
+
+
+CONFIG = 'config_brickpi3.json'
 
 
 def parser_arguments() -> argparse.Namespace:
     '''Parse the command line arguments'''
     parser = argparse.ArgumentParser()
-    parser.add_argument('mode', action='store', help='Robot mode')
+    parser.add_argument("-d", "--debug", action="store_true",
+                        help="Print debug information")
+    subparser = parser.add_subparsers(dest='command')
+    subparser.required = True
+
+    subparser.add_parser('remote', help='Remote control robot')
+
     return parser.parse_args()
 
 
-def load_config(mode: str) -> dict:
-    '''Load the configuration of this robot'''
-    config_filename = str(Path( __file__).stem) + '.json'
-    script_path = os.path.realpath(os.path.dirname( __file__))
-    config_filename = os.path.join(script_path, config_filename)
-    assert os.path.exists(config_filename)
+def load_config(filename: str, mode: str) -> dict:
+    '''Load the configuration of this robot
+
+    Args:
+        filename (str): the config filename
+
+        mode (str): operating mode
+
+    Return:
+        a dictionary containing the configuration for a specific mode
+    '''
+    assert os.path.exists(filename)
 
     config_data = None
-    with open(config_filename, encoding="utf-8") as config_file:
+    with open(filename, encoding="utf-8") as config_file:
         config_data = json.load(config_file)
 
     assert mode in config_data['robots'], f'{mode} config is not available'
     return config_data['robots'][mode]
 
 
-def remote_control_robot(config: str) -> None:
+def remote_control_robot(config: dict) -> None:
+    '''Control the robot via a infrared remote control
+
+    Args:
+        config (dict): the robot configruation
+    '''
     # TODO: maybe move this to the Motor class
     power = config['devices']['motors']['Left Motor']['power']
 
@@ -73,28 +95,22 @@ def remote_control_robot(config: str) -> None:
 
             time.sleep(0.01)
     except KeyboardInterrupt:
+        logging.info('Good Bye!')
         pass
     finally:
         robot.reset()
 
 
-# The dispatch table
-dispatcher = {
-    'remote' : remote_control_robot,
-}
-
-
-def dispatch(mode: str) -> None:
-    '''Call the function for the robot mode'''
-    assert mode in dispatcher, f'{mode} is not available in the dispatcher'
-    config = load_config(mode)
-    dispatcher[mode](config)
-
-
 def main() -> None:
     '''The main function'''
     args = parser_arguments()
-    dispatch(args.mode)
+    config = load_config(CONFIG, args.command)
+
+    setup_logging()
+    logging.info('Start BrickPi robot in {} mode'.format(args.command))
+
+    if args.command == 'remote':
+        remote_control_robot(config)
 
 
 if __name__ == '__main__':
