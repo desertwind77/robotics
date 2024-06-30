@@ -12,7 +12,7 @@ from utils import setup_logging
 from utils.brickpi3_board import BrickPiEV3
 
 
-CONFIG = 'config_brickpi3.json'
+CONFIG = 'config/config_brickpi3.json'
 
 
 def parser_arguments() -> argparse.Namespace:
