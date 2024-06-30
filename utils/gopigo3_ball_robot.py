@@ -3,8 +3,9 @@
 A ball tracking robot
 
 TODO
-- Pan back and forth when the object is near
-- Livestream
+- Fix the issue that the camera struggles with pan and tilt when the ball is
+  near. It is preferable to move the camera smoothly.
+- Livestream the video on a web interface.
 '''
 
 import logging
