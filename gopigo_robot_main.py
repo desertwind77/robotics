@@ -12,6 +12,7 @@ Caveats:
 
 import argparse
 import json
+import logging
 import os
 from utils import setup_logging
 from utils.gopigo3_board import GoPiGoRobot
@@ -54,7 +55,9 @@ def parser_arguments() -> argparse.Namespace:
     ball_parser.add_argument("-c", "--color", action="store",
                              default="Green", choices=["Green", "Blue"],
                              help="Choose the ball color")
-    ball_parser.add_argument("-d", "--display", action="store_true",
+    ball_parser.add_argument("--convert", action="store",
+                             help='Convert "red green blue" to lower and upper HSV bounds')
+    ball_parser.add_argument("--display", action="store_true",
                              help="Display the video frame on the screen")
 
     return parser.parse_args()
@@ -85,7 +88,14 @@ def main() -> None:
         robot.run(args.debug)
     elif args.command == 'ball':
         robot = BallTrackingRobot(args.color)
-        robot.run(args.display, args.debug)
+        if args.convert:
+            rgb = args.convert.split()
+            lower_bound, upper_bound = \
+                    robot.convert_rgb_to_hsv(rgb[0], rgb[1], rgb[2])
+            logging.info('Lower bound = {}'.format(lower_bound))
+            logging.info('Upper bound = {}'.format(upper_bound))
+        else:
+            robot.run(args.display, args.debug)
 
 if __name__ == '__main__':
    main()
