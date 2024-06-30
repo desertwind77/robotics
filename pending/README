@@ -1,0 +1,33 @@
+Debug:
+    sudo i2cdetect -y 1
+
+Gopigo
+- Movement API [ https://gopigo3.readthedocs.io/en/master/api-basic/structure.html#gopigo3-movement-api-methods ]
+  spin_right, spin_left, steer, orbit, drive_cm, drive_inches, drive_degree, target_reached, reset_encoders, read_encoders, turn_degrees
+- API Reference [ https://gopigo3.readthedocs.io/en/master/api-basic/structure.html ]
+- Interesting projects [ https://github.com/DexterInd/GoPiGo3/tree/master/Projects ]
+- Distance sensor [ https://di-sensors.readthedocs.io/en/master/examples/dist_sensor.html ]
+- Line follower [ https://www.dexterindustries.com/new-product-re-designed-line-follower-sensor/ ]
+
+Speech
+- https://realpython.com/python-speech-recognition/
+- https://maker.pro/raspberry-pi/projects/speech-recognition-using-google-speech-api-and-python
+- https://pypi.org/project/SpeechRecognition/
+- https://wiki.seeedstudio.com/ReSpeaker-USB-Mic-Array/
+
+- https://pythonprogramming.net/usb-foam-cannon-robot-gopigo-tutorial/?completed=/remote-control-robot-programming-tutorial/
+- https://www.youtube.com/watch?v=a6mjt8tWUws&t=0s
+- https://snowboy.kitt.ai/docs
+- https://www.seeedstudio.com/blog/2019/08/08/how-to-use-usb-mini-microphone-on-raspberry-pi-4/
+- https://stackoverflow.com/questions/4623572/how-do-i-get-a-list-of-my-devices-audio-sample-rates-using-pyaudio-or-portaudio
+- https://stackoverflow.com/questions/7088672/pyaudio-working-but-spits-out-error-messages-each-time
+- https://github.com/Arkq/bluez-alsa/issues/26
+
+- https://realpython.com/python-sockets/
+- https://realpython.com/intro-to-python-threading/
+- https://realpython.com/python-exceptions/
+
+- https://www.youtube.com/watch?v=VhbFbxyOI1k&t=1325s
+- https://www.youtube.com/watch?v=tk0QiiD8w7Q
+- https://tutorials-raspberrypi.com/how-to-arduino-raspberry-pi-communication/
+- https://tutorials-raspberrypi.com/raspberry-pi-sensors-overview-50-important-components/

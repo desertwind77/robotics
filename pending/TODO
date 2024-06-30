@@ -1,0 +1,33 @@
+- RobotMain.py
+  > RemoteControl
+    + Live stream of ball following
+    + Retrieve and display the robot status on the web interface via HTTP
+    + Speak
+  > Arduino : dipSwitch and other sensor
+  > Study GoPiGo in depth
+    + To see if we can get more accuracy from the motor
+    + To see what GoPiGo does and if we can do without it
+
+- ImageAnalyzer
+  > Follow face
+  > Follow a specific person
+  > Follow a specific object (with and without tensorflow)
+  > Stay in lane
+
+- Lidar
+  > Map the house and move
+  > Tracking moving object?
+  > Maze solver
+  > Collision avoidance
+
+- VoiceRecognizer (need USB Webcam)
+  > Command: sing, walk, camera on/off
+
+- Misc
+  > Health monitoring : CPU, mem, disk space, heat, battery, bluetooth / battery
+    https://www.raspberrypi.org/forums/viewtopic.php?t=34994
+  > Mobile app
+  > Control via Alexa
+  > GrovePi
+  > Control lego
+  > How to use Arduino
