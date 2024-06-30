@@ -209,7 +209,7 @@ class BallTrackingRobot(GoPiGoRobot):
                     # 1) The minium encircling cirle of the largest contour
                     cv2.circle(frame_in_bgr, (x, y), radius, BallTrackingRobot.CENTER_FRAME_COLOR, 2)
                     # 2) The centroid of the largest contour
-                    cv2.circle(frame_in_bgr, center, 5, BallTrackingRobot.CENTER_FRAME_COLOR, -1)
+                    cv2.circle(frame_in_bgr, center, 5, BallTrackingRobot.CENTER_FRAME_COLOR, 1)
                     # Make the center coordinate of the minimum encircling
                     # circle the center of the frame
                     self.move(x, y, radius)
@@ -221,7 +221,15 @@ class BallTrackingRobot(GoPiGoRobot):
                         # to export the display to another machine that
                         # supports X-Windows protocol.
                         cv2.imshow("Frame", frame_in_bgr)
+
+                        # TODO: periodically save the picture to files
+                        # cv2.imwrite('output.jpg', frame_in_bgr)
+
+                        # Wait for a key press for 1 second. Otherwise, the image will be displayed
+                        # and closed immediately. It is too fast to see anything on the screen.
+                        cv2.waitKey(1)
                 except cv2.error:
+                    cv2.destroyAllWindows()
                     display_on_screen = False
         except Exception as e:
             print(e)
