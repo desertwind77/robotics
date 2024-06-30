@@ -60,7 +60,11 @@ class BallTrackingRobot(GoPiGoRobot):
     Kp = 10
 
     def __init__(self, color: str) -> None:
-        '''Constructor'''
+        '''Constructor
+
+        Args:
+            color (str): the color of the ball to track
+        '''
         assert color in ball_hsv_values
 
         super(BallTrackingRobot, self).__init__()
@@ -81,11 +85,19 @@ class BallTrackingRobot(GoPiGoRobot):
         # Start the camera
         self.camera = VideoStream(0).start()
 
-    def convert_rgb_to_hsv(self, red, green, blue ):
+    def convert_rgb_to_hsv(self, red: int, green: int, blue: int ):
         '''In order to follow a ball of a solid color, we need to tell OpenCV what is the
         lower bound and the uppoer bound of the ball color in the hue, saturation and value
         format. We can do this by taking a photo of the ball and then use the color picker
-        tool in a image processing program like Photoship or Gimp to get the RGB value.'''
+        tool in a image processing program like Photoship or Gimp to get the RGB value.
+
+        Args:
+            red (int): the red value in RGB
+
+            green (int): the green value in RGB
+
+            blue (int): the blue value in RGB
+        '''
         bgr_color = np.uint8([[[blue, green, red ]]])
         hsv_color = cv2.cvtColor(bgr_color, cv2.COLOR_BGR2HSV)
         hue = hsv_color[0][0][0]
@@ -125,9 +137,17 @@ class BallTrackingRobot(GoPiGoRobot):
             contour = max(contours, key=cv2.contourArea)
         return contour
 
-    def move(self, x, y, radius):
+    def move(self, x: int, y: int, radius: int) -> None:
         '''Move the camera and the robot based on the position of the ball
-        in the frame.'''
+        contour in the frame.
+
+        Args:
+            x (int): the x coordinate of the centroid
+
+            y (int): the y coordinate of the centroid
+
+            radius (int): the radisu of the centroid
+        '''
         # Pan and tilt the camera to make the center coordinate of the centour
         # situated in the imaginary center frame.
         panAdjust = tiltAdjust = 0
@@ -165,11 +185,22 @@ class BallTrackingRobot(GoPiGoRobot):
               f'right_motor_speed = {right_motor_speed}'
         logging.info(msg)
 
-    def stop(self):
+    def stop(self) -> None:
+        '''Stop the robot'''
         self.set_motor_speed(0, is_left=True)
         self.set_motor_speed(0, is_left=False)
 
-    def run(self, display_on_screen: bool = False, debug: bool = False):
+    def run(self, display_on_screen: bool = False, image_save_interval: int = None,
+            debug: bool = False) -> None:
+        '''Track the ball with the pan and tile servo motors and follow the ball
+
+        Args:
+            display_on_screen (bool): a flag to display the captured image on the scren
+
+            image_save_interval (int): the interval to save the captured images
+
+            debug (bool): a flag to print the debug information
+        '''
         # Install the signal handler so that we can terminate the program
         # gracefully with Ctrl-C
         install_signal_handler()
