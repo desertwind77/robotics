@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 '''
-The main program for the GoPiGo3 robot
-1) Receive input from a USB gamepad
-2) Receive input from a USB keyboard
-3) Receive input from a web interface over the network
-4) Collision avoidance
+The main program for the GoPiGo3 robot with the following functionalities
+1) Remote Control Robot
+    - Receive input from a USB gamepad
+    - Receive input from a USB keyboard
+    - Receive input from a web interface over the network
+    - Collision avoidance
+2) Line Following Robot
+3) PID Line Following Robot
+4) Ball Tracking Robot
 
-Caveats:
+Known caveats:
 - Need to press Ctrl-C multiple times to terminate the program
 '''
 
