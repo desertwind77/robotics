@@ -62,10 +62,10 @@ class RemoteRobot(GoPiGoRobot):
                 'Low Voltage Warning : threshold = {} volt, current =  {} volt'
 
         voltage = self.get_voltage()
-        if voltage < GoPiGoRobot.LOW_VOLTAGE_THRESHOLD:
+        if voltage < RemoteRobot.LOW_VOLTAGE_THRESHOLD:
             logging.info(
                     lowVoltageMessage.format(
-                        GoPiGoRobot.LOW_VOLTAGE_THRESHOLD, voltage))
+                        RemoteRobot.LOW_VOLTAGE_THRESHOLD, voltage))
             return True
         return False
 
