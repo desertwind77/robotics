@@ -351,7 +351,7 @@ class BrickPiEV3:
         return None
 
 
-def main() -> main:
+def main() -> None:
     '''Demonstrate what BrickPi3 can do with EV3 motors and sensors'''
     robot = BrickPiEV3()
 
