@@ -63,6 +63,10 @@ def parser_arguments() -> argparse.Namespace:
                              help='Convert "red green blue" to lower and upper HSV bounds')
     ball_parser.add_argument("--display", action="store_true",
                              help="Display the video frame on the screen")
+    ball_parser.add_argument("-m", "--max", action="store",
+                             help="Maximum number of images to save")
+    ball_parser.add_argument("-s", "--save", action="store",
+                             help="Interval in seconds to save the captured images")
 
     return parser.parse_args()
 
@@ -99,7 +103,10 @@ def main() -> None:
             logging.info('Lower bound = {}'.format(lower_bound))
             logging.info('Upper bound = {}'.format(upper_bound))
         else:
-            robot.run(args.display, args.debug)
+            robot.run(display_on_screen=args.display,
+                      image_save_interval=int(args.save),
+                      max_save_image_num=int(args.max),
+                      debug=args.debug)
 
 if __name__ == '__main__':
    main()

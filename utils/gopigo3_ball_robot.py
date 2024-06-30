@@ -183,7 +183,7 @@ class BallTrackingRobot(GoPiGoRobot):
 
         msg = f'x = {x}, y = {y}, raius = {radius}, left_motor_speed = {left_motor_speed}, ' + \
               f'right_motor_speed = {right_motor_speed}'
-        logging.info(msg)
+        logging.debug(msg)
 
     def stop(self) -> None:
         '''Stop the robot'''
@@ -191,7 +191,7 @@ class BallTrackingRobot(GoPiGoRobot):
         self.set_motor_speed(0, is_left=False)
 
     def run(self, display_on_screen: bool = False, image_save_interval: int = None,
-            debug: bool = False) -> None:
+            max_save_image_num: int = 100, debug: bool = False) -> None:
         '''Track the ball with the pan and tile servo motors and follow the ball
 
         Args:
@@ -209,6 +209,8 @@ class BallTrackingRobot(GoPiGoRobot):
         logging.info('Started')
 
         try:
+            last_image_save_time = seq_no = 0
+            output_dir = 'output'
             while True:
                 (frame_in_bgr, frame_in_hsv) = self.get_video_frame()
                 mask = self.get_mask(frame_in_hsv)
@@ -245,6 +247,29 @@ class BallTrackingRobot(GoPiGoRobot):
                     # circle the center of the frame
                     self.move(x, y, radius)
 
+                # Periodically save the capture images to files
+                cur_time = time.time()
+                if image_save_interval is not None and \
+                        cur_time > last_image_save_time + image_save_interval and \
+                        seq_no < max_save_image_num:
+                    if not os.path.isdir(output_dir):
+                        os.mkdir(output_dir)
+                    # Find the number of digits needed for the sequence number
+                    num_digits = len(str(max_save_image_num))
+                    # Fill the sequence number with leading zeros
+                    seq_no_str = str(seq_no).zfill(num_digits)
+                    # Get the filename
+                    filename = f'{output_dir}/output{seq_no_str}.jpg'
+                    # Save the image to a file
+                    cv2.imwrite(filename, frame_in_bgr)
+                    # Wait for a key press for 1 second. Otherwise, the image will be displayed
+                    # and closed immediately. It is too fast to see anything on the screen.
+                    cv2.waitKey(1)
+
+                    last_image_save_time = cur_time
+                    seq_no += 1
+                    logging.info('Saved the captured image to {}'.format(filename))
+
                 try:
                     if display_on_screen:
                         # Show the image on the screen. The Raspberry Pi needs
@@ -252,16 +277,13 @@ class BallTrackingRobot(GoPiGoRobot):
                         # to export the display to another machine that
                         # supports X-Windows protocol.
                         cv2.imshow("Frame", frame_in_bgr)
-
-                        # TODO: periodically save the picture to files
-                        # cv2.imwrite('output.jpg', frame_in_bgr)
-
-                        # Wait for a key press for 1 second. Otherwise, the image will be displayed
-                        # and closed immediately. It is too fast to see anything on the screen.
-                        cv2.waitKey(1)
                 except cv2.error:
-                    cv2.destroyAllWindows()
+                    # Unable to dispaly the capture image on the screen. One possibility is that
+                    # the robot is not connected to the screen. It is also possible that the robot
+                    # were not able to forward X11 display to a remote host. So disable the
+                    # display_on_screen feature.
                     display_on_screen = False
+                    cv2.destroyAllWindows()
         except Exception as e:
             print(e)
             if debug:
