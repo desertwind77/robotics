@@ -16,7 +16,7 @@ class LineFollowingRobot(GoPiGoRobot):
         position = self.get_line_position()
         logging.debug('Line position = {}'.format(position))
 
-        if position == 'center':
+        if position == 'black':
             self.forward()
         elif position == 'left':
             self.left()
